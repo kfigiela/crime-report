@@ -1,0 +1,77 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 36d7de27a76d5ba1b82d6e98d2126c0760e9b8a47d0f66b25aabf1092c1e4e1d
+
+name:           crime-report
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/crime-report#readme>
+homepage:       https://github.com/githubuser/crime-report#readme
+bug-reports:    https://github.com/githubuser/crime-report/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/crime-report
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_crime_report
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , github
+    , optparse-applicative
+    , text
+    , time
+    , universum
+  default-language: Haskell2010
+
+executable crime-report-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_crime_report
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , crime-report
+    , github
+    , optparse-applicative
+    , text
+    , time
+    , universum
+  default-language: Haskell2010
+
+test-suite crime-report-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_crime_report
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , crime-report
+    , github
+    , optparse-applicative
+    , text
+    , time
+    , universum
+  default-language: Haskell2010
