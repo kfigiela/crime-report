@@ -1,5 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Main where
 
@@ -16,9 +17,9 @@ main = join $ execParser opts
   where
     opts = info (listCommitsP <**> helper)
       ( fullDesc
-     <> progDesc "List commits for IP report"
-     <> header "crime reporter" )
-
+     <> progDesc "Make sure to set GITHUB_TOKEN to access private repos."
+     <> header "crime reporter – List contributions for copyright transfer report. "
+      )
 listCommitsP :: Parser (IO ())
 listCommitsP =
   listCommits
@@ -27,23 +28,24 @@ listCommitsP =
   <*> strArgument (metavar "AUTHOR")
   <*> (flip UTCTime 0 <$> argument auto (metavar "FROM"))
   <*> (flip UTCTime 86400 <$> argument auto (metavar "TO"))
+  <*> option auto (long "maxPulls" <> metavar "COUNT" <> help "Number of recent pull-requests to check" <> value 300)
 
+type MaxPulls = Word
 
-fetchCommitsSince :: Name Owner -> Name Repo -> UTCTime -> IO [(SimplePullRequest, [Commit])]
-fetchCommitsSince owner repo from = do
+fetchCommitsSince :: Name Owner -> Name Repo -> UTCTime -> MaxPulls -> IO [(SimplePullRequest, [Commit])]
+fetchCommitsSince owner repo from maxPulls = do
   am <- getAuth
-  Right prs <- executeRequestMaybe am $ pullRequestsForR owner repo (stateAll <> sortByUpdated <> sortDescending) (FetchAtLeast 300)
-  putTextLn $ "Got " <> show (length prs) <> " pull requests."
+  prs <- throwLeft $ executeRequestMaybe am $ pullRequestsForR owner repo (stateAll <> sortByUpdated <> sortDescending) (FetchAtLeast maxPulls)
   let recentlyUpdated = filter (\pr -> simplePullRequestUpdatedAt pr >= from) $ toList prs
-  forM recentlyUpdated $ \pr -> do
-    Right commits <- executeRequestMaybe am $ pullRequestCommitsR owner repo (simplePullRequestNumber pr) FetchAll
-    putTextLn $ "Loaded commits for #" <> show (unIssueNumber $ simplePullRequestNumber pr) <> ": " <> simplePullRequestTitle pr
+  log $ "$ Got " <> show (length prs) <> " pull requests, only " <> show (length recentlyUpdated) <> " updated since " <> show from
+  forM (recentlyUpdated `zip` [1..]) $ \(pr, ix) -> do
+    commits <- throwLeft $ executeRequestMaybe am $ pullRequestCommitsR owner repo (simplePullRequestNumber pr) FetchAll
+    log $ "$ " <> show ix <> "/" <> show (length recentlyUpdated) <> ": #" <> show (unIssueNumber $ simplePullRequestNumber pr) <> ": " <> simplePullRequestTitle pr
     pure (pr, toList commits)
 
-
-listCommits :: Name Owner -> Name Repo -> Name User -> UTCTime -> UTCTime -> IO ()
-listCommits owner repo author from to = do
-  commits <- fetchCommitsSince owner repo from
+listCommits :: Name Owner -> Name Repo -> Name User -> UTCTime -> UTCTime -> MaxPulls ->  IO ()
+listCommits owner repo author from to maxPulls = do
+  commits <- fetchCommitsSince owner repo from maxPulls
   let
     filteredPRs =
       commits
@@ -63,8 +65,16 @@ betweenDates from to commit = authorDate >= from && authorDate < to
 
 getAuth :: IO (Maybe Auth)
 getAuth = do
-    token <- lookupEnv "GITHUB_TOKEN"
-    pure (OAuth . fromString <$> token)
+  token <- lookupEnv "GITHUB_TOKEN"
+  pure (OAuth . fromString <$> token)
 
 commitShortSha :: Commit -> Text
 commitShortSha = Text.take 7 . untagName . commitSha
+
+log :: Text -> IO ()
+log = hPutStrLn stderr
+
+throwLeft :: (MonadThrow m, Exception a) => m (Either a b) -> m b
+throwLeft action = action >>= \case
+  Right a -> pure a
+  Left e -> throwM e

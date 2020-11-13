@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 36d7de27a76d5ba1b82d6e98d2126c0760e9b8a47d0f66b25aabf1092c1e4e1d
+-- hash: 08400886e3f67f3cb98e5ba6c5027008de34d5454a384f35596a8f3f4ba65ad6
 
 name:           crime-report
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/crime-report#readme>
-homepage:       https://github.com/githubuser/crime-report#readme
-bug-reports:    https://github.com/githubuser/crime-report/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2020 Author name here
+description:    Please see the README on GitHub at <https://github.com/kfigiela/crime-report#readme>
+homepage:       https://github.com/kfigiela/crime-report#readme
+bug-reports:    https://github.com/kfigiela/crime-report/issues
+author:         Kamil Figiela
+maintainer:     kamil.figiela@gmail.com
+copyright:      2020 Kamil Figiela
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,11 +23,9 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/crime-report
+  location: https://github.com/kfigiela/crime-report
 
 library
-  exposed-modules:
-      Lib
   other-modules:
       Paths_crime_report
   hs-source-dirs:
