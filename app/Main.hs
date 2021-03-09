@@ -17,7 +17,7 @@ main = join $ execParser opts
   where
     opts = info (listCommitsP <**> helper)
       ( fullDesc
-     <> progDesc "Make sure to set GITHUB_TOKEN to access private repos."
+     <> progDesc "Make sure to set GITHUB_TOKEN to access private repos (see: https://github.com/settings/tokens)."
      <> header "crime reporter – List contributions for copyright transfer report. "
       )
 listCommitsP :: Parser (IO ())
